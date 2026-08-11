@@ -1,6 +1,11 @@
 import fastify from "fastify"
+import cors from "@fastify/cors";
 
 const server = fastify({logger:true});
+
+server.register(cors, {
+    origin: "*"
+})
 
 const teams = [
     {id:1, name: "Ferrari", base: "Maranello, Italy",}, 
@@ -83,15 +88,30 @@ server.get("/teams", async(request, response) =>{
     response.type("application/json").code(200)
 
     return {teams}
-})
+});
 
 
 server.get("/pilots", async(request, response) =>{
     response.type("application/json").code(200)
 
     return {pilots}
-})
+});
+interface PilotsParams{
+    id: string;
+}
+
+server.get<{Params: PilotsParams}>("/pilots/:id", async(request, response) =>{
+    const id = parseInt(request.params.id)
+    const pilot = pilots.find((p: any) => p.id === id)
+
+    if(!pilot){
+        response.status(404).send("Piloto não encontrado!")
+        return;
+    }
+    response.type("application/json").code(200)
+    return {pilot}
+});
 
 server.listen({port: 3333}, () => {
     console.log("Servidor inicializado...")
-})
+});
